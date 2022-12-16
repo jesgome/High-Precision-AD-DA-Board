@@ -1,3 +1,26 @@
+#############################################
+#
+# Version: 19.08.2022
+#
+# Author: Waveshare Team
+#
+# Editor: Jesus Gomez
+#
+# This is the Waveshare python library for ADS1256 ADC shield. There are 3 major updates to
+# the original function libraries:
+#
+#   1 - ScanMode for single or differential input is now supported
+#       with ADS1256_SetMode(mode)
+#
+#   2 - Analog input buffer activation is now supported
+#       with ADS1256_SetBuffEn(data)
+#
+#   3 - Set channels and get all functions now support single or differential
+#       input modes
+#
+# These updates are set as pull requests in github. Upvote if you like and use them and
+# make sure to reference my work in your projects!
+#
 import config
 import RPi.GPIO as GPIO
 
@@ -117,7 +140,7 @@ class ADS1256:
         buf[1] = 0x08
         buf[2] = (0<<5) | (0<<3) | (gain<<0)
         buf[3] = drate
-        
+        #print(buf)
         config.digital_write(self.cs_pin, GPIO.LOW)#cs  0
         config.spi_writebyte([CMD['CMD_WREG'] | 0, 0x03])
         config.spi_writebyte(buf)
@@ -125,8 +148,14 @@ class ADS1256:
         config.digital_write(self.cs_pin, GPIO.HIGH)#cs 1
         config.delay_ms(1) 
 
-    def ADS1256_SetMode(self,Mode):
+    def ADS1256_SetMode(self,Mode):     # New function for single and differential input
         self.ScanMode=Mode
+
+    def ADS1256_SetBuffEn(self,data):   # New function to enable high impedance input buffer
+        if data==0:
+            return 0
+        else:
+            self.ADS1256_WriteReg(REG_E['REG_STATUS'],0x02)
 
     def ADS1256_SetChannal(self, Channal):
         if Channal>7:
@@ -167,7 +196,7 @@ class ADS1256:
         return read
  
     def ADS1256_GetChannalValue(self, Channel):
-        if self.ScanMode == 0:# 0  Single-ended input  8 channel 1 Differential input 4 channel 
+        if self.ScanMode==0:# 0  Single-ended input  8 channel 1 Differential input 4 channel 
             if Channel>7:
                 return 0
             self.ADS1256_SetChannal(Channel)
