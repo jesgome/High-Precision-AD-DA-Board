@@ -22,7 +22,6 @@
 # make sure to reference my work in your projects!
 #
 import config
-import RPi.GPIO as GPIO
 
 # gain channel
 ADS1256_GAIN_E = {'ADS1256_GAIN_1' : 0, # GAIN   1
@@ -92,27 +91,27 @@ class ADS1256:
 
     # Hardware reset
     def ADS1256_reset(self):
-        config.digital_write(self.rst_pin, GPIO.HIGH)
+        config.digital_write(self.rst_pin, 1)
         config.delay_ms(200)
-        config.digital_write(self.rst_pin, GPIO.LOW)
+        config.digital_write(self.rst_pin, 0)
         config.delay_ms(200)
-        config.digital_write(self.rst_pin, GPIO.HIGH)
+        config.digital_write(self.rst_pin, 1)
     
     def ADS1256_WriteCmd(self, reg):
-        config.digital_write(self.cs_pin, GPIO.LOW)#cs  0
+        config.digital_write(self.cs_pin, 0)#cs  0
         config.spi_writebyte([reg])
-        config.digital_write(self.cs_pin, GPIO.HIGH)#cs 1
+        config.digital_write(self.cs_pin, 1)#cs 1
     
     def ADS1256_WriteReg(self, reg, data):
-        config.digital_write(self.cs_pin, GPIO.LOW)#cs  0
+        config.digital_write(self.cs_pin, 0)#cs  0
         config.spi_writebyte([CMD['CMD_WREG'] | reg, 0x00, data])
-        config.digital_write(self.cs_pin, GPIO.HIGH)#cs 1
+        config.digital_write(self.cs_pin, 1)#cs 1
         
     def ADS1256_Read_data(self, reg):
-        config.digital_write(self.cs_pin, GPIO.LOW)#cs  0
+        config.digital_write(self.cs_pin, 0)#cs  0
         config.spi_writebyte([CMD['CMD_RREG'] | reg, 0x00])
         data = config.spi_readbytes(1)
-        config.digital_write(self.cs_pin, GPIO.HIGH)#cs 1
+        config.digital_write(self.cs_pin, 1)#cs 1
 
         return data
         
@@ -181,11 +180,11 @@ class ADS1256:
         
     def ADS1256_Read_ADC_Data(self):
         self.ADS1256_WaitDRDY()
-        config.digital_write(self.cs_pin, GPIO.LOW)#cs  0
+        config.digital_write(self.cs_pin, 0)#cs  0
         config.spi_writebyte([CMD['CMD_RDATA']])
 
         buf = config.spi_readbytes(3)
-        config.digital_write(self.cs_pin, GPIO.HIGH)#cs 1
+        config.digital_write(self.cs_pin, 1)#cs 1
         read = (buf[0]<<16) & 0xff0000
         read |= (buf[1]<<8) & 0xff00
         read |= (buf[2]) & 0xff
